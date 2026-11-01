@@ -32,6 +32,7 @@ The site was rebuilt in October 2026, on a current Ruby, the latest Jekyll and a
 ├── style-guide/       Theme test pages, published: false, built with --unpublished
 ├── index.html         Bruin's introduction. Its layout, home, adds the latest blog post and three recent papers
 ├── about.md, impressum.md  The about page and the Impressum
+├── 404.html           "Page not found", for the bucket's ErrorDocument. S3 serves it at the missing address, so its links start with "/". Its noindex: true drops the canonical link
 ├── papers/_posts/     The papers, each named <date>-<slug>.md
 │   └── _drafts/       Bruin's Word files and Markdown drafts. Jekyll never builds the folder, but anyone can read it on GitHub
 ├── blog/_posts/       The blog posts

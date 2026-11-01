@@ -6,7 +6,12 @@
   <title>{% if title != "" and page.url != "/" %}{{ title }} | {% endif %}{{ site.title | escape }}</title>
   {%- assign description = page.abstract | default: page.excerpt | default: site.description %}
   <meta name="description" content="{{ description | markdownify | strip_html | normalize_whitespace | strip | truncate: 160 | escape_once }}">
+  {%- comment -%} 404.html sets noindex. A canonical link there would contradict it. {%- endcomment %}
+  {%- if page.noindex %}
+  <meta name="robots" content="noindex">
+  {%- else %}
   <link rel="canonical" href="{{ page.url | replace: 'index.html', '' | absolute_url }}">
+  {%- endif %}
   <link rel="alternate" type="application/rss+xml" title="{{ site.title | escape }}" href="{{ '/feed.xml' | absolute_url }}">
   {%- comment -%} sizes="32x32", not "any", or Chrome fetches the ICO as well as the SVG. {%- endcomment %}
   <link rel="icon" href="{{ '/favicon.ico' | relative_url }}" sizes="32x32">

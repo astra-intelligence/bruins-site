@@ -1,0 +1,34 @@
+---
+layout: base
+title: Page not found
+permalink: /404.html
+noindex: true
+---
+{%- comment -%}
+The bucket's ErrorDocument. S3 serves it, with a 403 status, at any address
+that has no file, so every link here has to start with "/".
+{%- endcomment -%}
+<article class="post">
+  <header class="post-header">
+    <h1 class="post-title">{{ page.title }}</h1>
+  </header>
+  <div class="post-content">
+    <p>There’s no page at this address.</p>
+    <p>If you typed the address, check it’s spelt exactly right, capital letters included.</p>
+    <p>If you pasted the address, or followed a link in an email, check you have all of it. A long address can break over two lines in an email, leaving only the first line in the link.</p>
+    <p>If you followed a link from another website, the link may be wrong, or the page may have been taken down.</p>
+
+    <h2>Where to look</h2>
+    <p>You may find what you’re after on one of these pages:</p>
+    <ul>
+      <li><a href="/papers/">Papers</a></li>
+      <li><a href="/blog/">Blog</a></li>
+      <li><a href="/courses/">Course materials</a>, from my teaching</li>
+      <li><a href="/about/">About</a>, with a list of my publications</li>
+      <li>the <a href="/">home page</a></li>
+    </ul>
+
+    <h2>Still can’t find it?</h2>
+    <p>Email me at <a href="mailto:carleton.christensen@gmail.com">carleton.christensen@gmail.com</a>. Let me know the address you tried and, if you followed a link, where you found it.</p>
+  </div>
+</article>
