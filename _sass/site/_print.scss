@@ -6,6 +6,10 @@
 // wide outer margins for things like handwritten notes. Unlike the old site,
 // an h2 doesn't start a new page.
 
+// The site's address, from `url` in _config.yml, for the addresses printed
+// after site links. main.scss passes it in.
+$site-url: "" !default;
+
 @media print {
   /**
    * Pages
@@ -114,12 +118,33 @@
   /**
    * Links and footnote references
    *
-   * Links print black and underlined, without their URLs. The print palette
-   * clears the footnote references' background, so they print as plain
-   * superscript numbers.
+   * Links print black and underlined, except in Bruin's text and abstracts.
+   * There a link to another page prints plain, followed by its address in
+   * brackets, so a printed copy keeps his sources (Issue #18). A site address
+   * starting with "/" gets the site's own in front. A link whose text is
+   * already its address, marked `bare-url` by content.html, shows it only
+   * once. An address breaks anywhere to fit the line, without the hyphens the
+   * text column adds. Links within the page, such as footnote references,
+   * print no address. The print palette clears the footnote references'
+   * background, so they print as plain superscript numbers.
    */
   a {
     text-decoration-line: underline;
+  }
+
+  :is(.post-content, .abstract) a[href]:not([href^="#"]) {
+    text-decoration-line: none;
+  }
+
+  :is(.post-content, .abstract) a[href]:not([href^="#"], .bare-url)::after {
+    content: " (" attr(href) ")";
+    -webkit-hyphens: manual;
+    hyphens: manual;
+    overflow-wrap: anywhere;
+  }
+
+  :is(.post-content, .abstract) a[href^="/"]:not(.bare-url)::after {
+    content: " (#{$site-url}" attr(href) ")";
   }
 
   a.footnote {

@@ -19,7 +19,7 @@ The site was rebuilt in October 2026, on a current Ruby, the latest Jekyll and a
 ├── Gemfile.lock       Resolved gem versions for every platform
 ├── _config.yml        Jekyll config
 ├── _data/navigation.yml  The header and footer links, in order
-├── _includes/         head, header and footer, from Minima 2.5.2; content.html, which fixes kramdown's footnote and table markup; interface-lang.html, which marks interface text lang="en-AU" on German pages; print-button.html
+├── _includes/         head, header and footer, from Minima 2.5.2; content.html, which fixes kramdown's footnote and table markup and marks links whose text is their address; interface-lang.html, which marks interface text lang="en-AU" on German pages; print-button.html
 ├── _layouts/          base, page and post, from Minima 2.5.2; post serves papers and blog posts; course-document is a copy of post for course documents, without the date, "Updated" and version line, which Bruin keeps in the files for himself, so keep the two in step; home lists the latest blog post and three recent papers; course-overview is each course's index, with the hero and its document list
 ├── _sass/minima/      Minima's Sass as @use modules, with its MIT licence in LICENSE.txt
 ├── _sass/site/        The site's own Sass: _tokens.scss holds every colour as a custom property, in light, dark and two more-contrast palettes plus a print palette as its last block, _fonts.scss the @font-face rules, _content.scss the footnote, table and other Markdown styles, _post.scss the article header, print button and abstract box, _listings.scss the shared .item-list used by the home page and every index, _home.scss the introduction, _course.scss the course hero, _print.scss the print stylesheet, loaded last
@@ -96,6 +96,7 @@ The user chose each of these on purpose. They aren't bugs, so don't undo them:
 - Print keeps the wide outer margins, on the edge away from the binding, so students have room for notes. Don't swap them to the inner edge.
 - The site title is "Carleton B. Christensen", and the print button inverts its colours on hover. The user chose both on 2026-10-20, in place of the first build's "Bruin Christensen" and a hover that only darkened the text and border. The footer's "Carleton Bruin Christensen" is meant to stay.
 - `html` has `scrollbar-gutter: stable` (2026-10-25), so the centred column doesn't shift sideways between short and long pages. On short pages that leaves a strip of page background at the right end of the header and footer, where a scrollbar would sit.
+- In print, links in Bruin's text and abstracts aren't underlined, and each shows its address in brackets after it (Issue #18, 2026-11-01). Site links get the site's `url` in front, passed in by `assets/css/main.scss`, so a `jekyll serve` build prints `http://localhost:4000`.
 - Footnote jump targets keep their focus outline after a mouse click. Safari draws it then and Chrome and Firefox don't, a difference the user accepted on 2026-10-26.
 - In Safari, a page scroll by trackpad or mouse wheel with the pointer over a table box leaves the arrow keys unable to scroll that box. It's a Safari bug, not the theme's, and keyboard-only use isn't affected. The user chose on 2026-10-27, and again on 2026-10-29, to leave it rather than add a script.
 

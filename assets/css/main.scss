@@ -12,4 +12,6 @@
 @use "site/listings";
 @use "site/home";
 @use "site/course";
-@use "site/print";
+// Jekyll fills in `url` from _config.yml, for the addresses print shows
+// after site links.
+@use "site/print" with ($site-url: "{{ site.url }}");

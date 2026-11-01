@@ -14,7 +14,10 @@
   exact markup, so
   check them after a kramdown update. On German pages the labels are marked
   English, and the table gets the page's language back. The boxes are
-  numbered, so each region landmark has its own name.
+  numbered, so each region landmark has its own name. A link whose text is
+  its own address, as in [http://…](http://…), gets class="bare-url", as
+  does a mailto: link whose text is the email address. Print adds each
+  link's address after it, and skips these, which already show theirs.
 {%- endcomment -%}
 {%- capture ui_lang %}{% include interface-lang.html %}{% endcapture -%}
 {%- if ui_lang != "" %}{% capture table_lang %} lang="{{ page.lang }}"{% endcapture %}{% endif -%}
@@ -67,6 +70,24 @@
   {%- endcapture -%}
 {%- endif -%}
 {%- assign html = html | replace: '<li id="fn:', '<li tabindex="-1" id="fn:' -%}
+{%- if html contains '<a href="' -%}
+  {%- assign parts = html | split: '<a href="' -%}
+  {%- capture html -%}
+    {%- for part in parts -%}
+      {%- if forloop.first -%}
+        {{ part }}
+      {%- else -%}
+        {%- assign href = part | split: '"' | first -%}
+        {%- assign text = href -%}
+        {%- assign scheme = href | slice: 0, 7 -%}
+        {%- if scheme == "mailto:" %}{% assign text = href | remove_first: "mailto:" %}{% endif -%}
+        {%- capture bare %}{{ href }}">{{ text }}</a>{% endcapture -%}
+        {%- assign start = part | slice: 0, bare.size -%}
+        <a {% if start == bare %}class="bare-url" {% endif %}href="{{ part }}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endcapture -%}
+{%- endif -%}
 {%- if html contains '<table>' -%}
   {%- assign parts = html | split: '<table>' -%}
   {%- capture html -%}

@@ -111,7 +111,7 @@ Click the cross, then **Details**, to see the file, the line and what to change.
 
 ### After a kramdown or Jekyll update
 
-Check the style guide still shows one "Notes" heading, footnote links that jump both ways, and tables that scroll on a narrow screen. `_includes/content.html` rewrites that markup by exact string match.
+Check the style guide still shows one "Notes" heading, footnote links that jump both ways, tables that scroll on a narrow screen, and, in print preview, the dict.cc address in its notes only once. `_includes/content.html` rewrites that markup by exact string match.
 
 ### Local checks
 

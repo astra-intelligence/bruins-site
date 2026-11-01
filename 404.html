@@ -6,7 +6,9 @@ noindex: true
 ---
 {%- comment -%}
 The bucket's ErrorDocument. S3 serves it, with a 403 status, at any address
-that has no file, so every link here has to start with "/".
+that has no file, so every link here has to start with "/". The email link
+has class="bare-url" by hand, as content.html gives Bruin's, so print doesn't
+repeat the address.
 {%- endcomment -%}
 <article class="post">
   <header class="post-header">
@@ -29,6 +31,6 @@ that has no file, so every link here has to start with "/".
     </ul>
 
     <h2>Still can’t find it?</h2>
-    <p>Email me at <a href="mailto:carleton.christensen@gmail.com">carleton.christensen@gmail.com</a>. Let me know the address you tried and, if you followed a link, where you found it.</p>
+    <p>Email me at <a class="bare-url" href="mailto:carleton.christensen@gmail.com">carleton.christensen@gmail.com</a>. Let me know the address you tried and, if you followed a link, where you found it.</p>
   </div>
 </article>

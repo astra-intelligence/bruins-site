@@ -63,6 +63,10 @@ For any other term ⌜_t_⌝ I might use to pick myself out, there would always 
 
 In seiner Vorlesung _Platon: Sophistes_ behauptet Heidegger, dass mit der _phrónesis_ Aristoteles auf das Phänomen des Gewissens gestoßen ist.[^2] A mechanical whole is a whole composed of parts.[^3] Wholes are not simply sums of their parts.[^4]
 
+## Links
+
+In March, 2012, the ACT government released the document [*Transport for Canberra*](/files/pdfs/Transport-for-Canberra-2012-2031.pdf).[^5] It is a condition of ‘authentic’ existence as a self, ‘authentic’ in the sense of being fully or properly a self—*eigentliches Selbstsein*.[^6]
+
 ## Definition list
 
 1596
@@ -125,3 +129,7 @@ The **philosophy of technology** <span class="amp">&amp;</span> **sustainability
 [^3]: The principle example of a whole in this sense is the machine, e.g., a clock or an internal combustion engine—whence the term ‘mechanism’.
 
 [^4]: The contrasting position to mechanism is the organicist conception of nature, classically represented by Aristotle’s conception of nature.
+
+[^5]: For more on the ACT Government’s transport policy see the page ["Planning for the Future"](https://www.transport.act.gov.au/about-us/planning-for-the-future) at the website of _Transport Canberra_.
+
+[^6]: See [http://www.dict.cc/?s=eigentlich](http://www.dict.cc/?s=eigentlich).
