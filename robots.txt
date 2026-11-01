@@ -1,0 +1,48 @@
+# Asks AI companies not to train their models on this site. Search
+# engines, and every other crawler, may read all of it.
+#
+# Crawlers obey robots.txt by choice. One that ignores it still gets
+# every page.
+#
+# The rules follow RFC 9309. A crawler obeys the one group that names it,
+# or the "User-agent: *" group if none does. Comment lines can sit inside
+# a group. Blank lines can't, because older parsers, such as the one in
+# Python 3.11, end the group there.
+#
+# Each name comes from its operator's own crawler documentation, and
+# __usage_ai-training from the IETF draft
+# draft-kelley-aipref-training-preference-signal, all checked on
+# 2026-11-01. Check them again every six months, against those pages and
+# https://github.com/ai-robots-txt/ai.robots.txt, and add a name only once
+# its operator documents it.
+
+# Shared opt-out from AI training, which Google and Microsoft back. No crawler sends it.
+User-agent: __usage_ai-training
+# Opt the whole site out of AI training.
+Disallow: /
+
+# OpenAI's training crawler. ChatGPT search uses OAI-SearchBot, which isn't listed.
+User-agent: GPTBot
+# Anthropic's training crawler. Claude's search uses Claude-SearchBot, which isn't listed.
+User-agent: ClaudeBot
+# Google's opt-out from Gemini training and answers. No crawler sends it, and Search ignores it.
+User-agent: Google-Extended
+# Apple's AI-training opt-out. No crawler sends it. Applebot still crawls for Siri and Spotlight.
+User-agent: Applebot-Extended
+# Meta's crawler for training its AI models.
+User-agent: meta-externalagent
+# Amazon's crawler, which may train Amazon's AI models. Alexa search uses Amzn-SearchBot.
+User-agent: Amazonbot
+# Mistral AI's training crawler.
+User-agent: MistralAI-Training
+# Ai2's crawler, which trains its open language models.
+User-agent: AI2Bot
+# Common Crawl's crawler. Its free web archive is widely used to train AI models.
+User-agent: CCBot
+# Block the whole site for every name in this group.
+Disallow: /
+
+# All other crawlers, including search engines and AI search, and AI assistants fetching a page.
+User-agent: *
+# An empty Disallow blocks nothing.
+Disallow:
