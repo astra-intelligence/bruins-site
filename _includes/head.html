@@ -11,6 +11,22 @@
   <meta name="robots" content="noindex">
   {%- else %}
   <link rel="canonical" href="{{ page.url | replace: 'index.html', '' | absolute_url }}">
+  {%- comment -%} Open Graph for link previews: when someone pastes a page's
+  address into Facebook, LinkedIn, Mastodon, Slack or a messaging app, the
+  service builds a preview card from these tags. The old site's jekyll-seo-tag
+  wrote them and the new site has none. They make no requests of their own, so
+  the privacy statement in impressum.md doesn't change. Resolves Issue #46. {%- endcomment -%}
+  <meta property="og:site_name" content="{{ site.title | escape }}">
+  <meta property="og:title" content="{% if title != '' and page.url != '/' %}{{ title }} | {% endif %}{{ site.title | escape }}">
+  <meta property="og:description" content="{{ description | markdownify | strip_html | normalize_whitespace | strip | truncate: 160 | escape_once }}">
+  <meta property="og:url" content="{{ page.url | replace: 'index.html', '' | absolute_url }}">
+  <meta property="og:type" content="{% if page.date %}article{% else %}website{% endif %}">
+  <meta property="og:locale" content="{{ site.lang | default: 'en_AU' | replace: '-', '_' }}">
+  <meta property="og:image" content="{{ '/og-default.png' | absolute_url }}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="{{ site.title | escape }}">
+  <meta name="twitter:card" content="summary_large_image">
   {%- endif %}
   <link rel="alternate" type="application/rss+xml" title="{{ site.title | escape }}" href="{{ '/feed.xml' | absolute_url }}">
   {%- comment -%} sizes="32x32", not "any", or Chrome fetches the ICO as well as the SVG. {%- endcomment %}
