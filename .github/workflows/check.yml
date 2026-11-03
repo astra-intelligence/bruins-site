@@ -72,8 +72,8 @@ jobs:
       - name: Doctor
         run: bundle exec jekyll doctor
       # The deploy job copies exactly this build, so on master it's kept as
-      # an artifact for a day. An artifact belongs to the whole run, so
-      # overwrite lets a re-run of all jobs replace it.
+      # an artifact for a day. overwrite replaces any site artifact this run
+      # already has, so the upload can't fail on the name.
       - name: Keep the build for the deploy
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         uses: actions/upload-artifact@v7
@@ -131,7 +131,7 @@ jobs:
         if: steps.tip.outputs.deploy == 'true'
         run: |
           test -f site/index.html
-          aws s3 sync site "s3://$BUCKET" --no-progress --cache-control no-cache --dryrun
+          aws s3 sync site "s3://$BUCKET" --no-progress --cache-control no-cache
 
   # Separate jobs, so the build steps never hold a token that can write
   # issues. Each expression reaches its script through env:, never pasted
