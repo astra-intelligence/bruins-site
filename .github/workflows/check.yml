@@ -126,12 +126,14 @@ jobs:
           aws-region: ap-southeast-2
           mask-aws-account-id: true
       # no-cache makes browsers ask S3 each time whether a file changed, so
-      # an edit shows on the next page load.
+      # an edit shows on the next page load. --delete removes what the
+      # build no longer makes, so a file deleted or renamed in the repo
+      # leaves the site too.
       - name: Upload to S3
         if: steps.tip.outputs.deploy == 'true'
         run: |
           test -f site/index.html
-          aws s3 sync site "s3://$BUCKET" --no-progress --cache-control no-cache
+          aws s3 sync site "s3://$BUCKET" --no-progress --cache-control no-cache --delete
 
   # Separate jobs, so the build steps never hold a token that can write
   # issues. Each expression reaches its script through env:, never pasted
