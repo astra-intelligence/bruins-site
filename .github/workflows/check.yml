@@ -1,6 +1,7 @@
 # Checks every push and pull request: Bruin's Markdown, the content
 # check's own self-test, a production build, every live URL and jekyll
-# doctor. Deploying isn't part of this workflow.
+# doctor. On master, the deploy job then copies the checked build to the
+# S3 bucket that serves the site.
 name: Check
 
 on:
@@ -12,13 +13,14 @@ permissions:
 
 # For the notice jobs at the end. GitHub emails only the person whose push
 # started a run, which on master is usually Bruin. So on master a failed
-# check opens an issue assigned to NOTIFY_LOGIN, or comments on the one
-# already open, and the next passing push closes it. Each file the content
-# check warns about gets an issue of its own, closed once the file has no
-# warning. Assignment is what notifies, so no issue text has an @-mention.
+# check or deploy opens an issue assigned to NOTIFY_LOGIN, or comments on
+# the one already open, and the next passing push closes it. Each file the
+# content check warns about gets an issue of its own, closed once the file
+# has no warning. Assignment is what notifies, so no issue text has an
+# @-mention.
 env:
   NOTIFY_LOGIN: klepas
-  ISSUE_TITLE: The site check failed on master
+  ISSUE_TITLE: The site check or deploy failed on master
 
 jobs:
   check:
@@ -69,18 +71,79 @@ jobs:
         run: ruby _scripts/check-urls.rb _scripts/live-url-inventory.tsv "$RUNNER_TEMP/site"
       - name: Doctor
         run: bundle exec jekyll doctor
+      # The deploy job copies exactly this build, so on master it's kept as
+      # an artifact for a day. An artifact belongs to the whole run, so
+      # overwrite lets a re-run of all jobs replace it.
+      - name: Keep the build for the deploy
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        uses: actions/upload-artifact@v7
+        with:
+          name: site
+          path: ${{ runner.temp }}/site
+          retention-days: 1
+          if-no-files-found: error
+          overwrite: true
+
+  # Copies the checked build to the bucket. AWS lets only a run on this
+  # repo's master take the deploy role, through GitHub's OIDC token, so no
+  # AWS key is stored anywhere. One deploy runs at a time, and a run whose
+  # commit is no longer master's tip leaves the upload to the newer run, so
+  # an older build never overwrites a newer one.
+  deploy:
+    needs: check
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-24.04
+    permissions:
+      id-token: write
+    concurrency:
+      group: deploy
+      cancel-in-progress: false
+    env:
+      BUCKET: www.cbchristensen.net
+    steps:
+      - name: Check this commit is still master's tip
+        id: tip
+        env:
+          REPO_URL: ${{ github.server_url }}/${{ github.repository }}.git
+          SHA: ${{ github.sha }}
+        run: |
+          ref=$(git ls-remote --exit-code "$REPO_URL" refs/heads/master)
+          tip=$(printf '%s\n' "$ref" | cut -f1)
+          if [ "$tip" = "$SHA" ]; then
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::master is now at $tip, so its run deploys instead."
+          fi
+      - uses: actions/download-artifact@v8
+        if: steps.tip.outputs.deploy == 'true'
+        with:
+          name: site
+          path: site
+      - uses: aws-actions/configure-aws-credentials@v6
+        if: steps.tip.outputs.deploy == 'true'
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ap-southeast-2
+          mask-aws-account-id: true
+      # no-cache makes browsers ask S3 each time whether a file changed, so
+      # an edit shows on the next page load.
+      - name: Upload to S3
+        if: steps.tip.outputs.deploy == 'true'
+        run: |
+          test -f site/index.html
+          aws s3 sync site "s3://$BUCKET" --no-progress --cache-control no-cache --dryrun
 
   # Separate jobs, so the build steps never hold a token that can write
   # issues. Each expression reaches its script through env:, never pasted
   # into the script itself, so text from a push can't run as a command.
   notify:
-    needs: check
+    needs: [check, deploy]
     if: failure() && github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-24.04
     permissions:
       issues: write
     steps:
-      - name: Tell the user the check failed
+      - name: Tell the user the check or deploy failed
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
@@ -88,7 +151,7 @@ jobs:
           COMMIT_URL: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
           PUSHER: ${{ github.actor }}
         run: |
-          body="The check failed on master. The run shows which step failed and why.
+          body="The check or the deploy failed on master. The run shows which step failed and why.
 
           - Run: $RUN_URL
           - Commit: $COMMIT_URL
@@ -102,7 +165,7 @@ jobs:
           fi
 
   close-notice:
-    needs: check
+    needs: [check, deploy]
     if: success() && github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-24.04
     permissions:
@@ -119,7 +182,7 @@ jobs:
           open=$(gh issue list --state open --limit 200 --json number,title)
           number=$(jq -r --arg title "$ISSUE_TITLE" 'map(select(.title == $title)) | first | .number // empty' <<< "$open")
           if [ -n "$number" ]; then
-            gh issue close "$number" --comment "The check passed on master again.
+            gh issue close "$number" --comment "The check and the deploy passed on master again.
 
           - Run: $RUN_URL
           - Commit: $COMMIT_URL
