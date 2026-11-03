@@ -43,7 +43,7 @@ The site was rebuilt in October 2026, on a current Ruby, the latest Jekyll and a
 ├── README.md          The repo's front page on GitHub, with Bruin's "Writing in Markdown" guide. Excluded from the build
 ├── .claude/skills/    Project skills, see Skills below
 ├── .gitattributes     LF line endings for text files committed from a clone; the content check's fixtures keep their bytes
-├── .github/workflows/check.yml  The GitHub check and its notices to the user, see Content checks below
+├── .github/workflows/check.yml  The GitHub check, the deploy and the notices to the user, see Content checks and Deployment below
 └── plans/             Plan sets, one folder each (only AGENTS.md and CLAUDE.md are committed)
     ├── done/          Finished plan sets
     └── tools/         screenshots/ takes Playwright screenshots of the site in every colour mode, favicon/ writes the icon files, fonts/ downloads the fonts and writes _sass/site/_fonts.scss. Each has a README.md
@@ -64,7 +64,7 @@ The site runs Jekyll 4.4.1, the newest stable release as of 2026-10-18. The old 
 - `kramdown.input: kramdown` is kramdown's own syntax, which the site has always used. Don't switch to GFM, Jekyll 4's default. It changes the heading ids on 35 pages, breaking any outside link to a section, and renders some of Bruin's Markdown differently. `README.md`'s "Writing in Markdown" guide has the rules Bruin follows.
 - Each course document holds its live URL as a literal `permalink:`, and so do the two papers whose URLs keep a curly apostrophe or a space. Never edit those lines. Bruin can retitle a page without moving it. A new course document needs a literal `permalink:` of its own too, such as `/courses/descartes/a-short-title/`. Without one it builds to `/courses/<collection>/` and replaces the course's index page. A placeholder such as `:title` makes Jekyll 4 take the URL from the file name. The content check rejects both, and any `permalink:` two pages share.
 - `strict_front_matter: true` makes a top block YAML can't read fail the build. Without it, Jekyll publishes the page anyway, at a URL with the build day's date. Keep it.
-- `future: true` publishes a paper dated after the build's day in UTC. Bruin works in Canberra, 10 or 11 hours ahead, so a paper he dates today and commits in the morning is in the future for a UTC build. Without the setting, Jekyll would leave it out and still exit `0`. The user wants to revisit it before the new site goes live (asked on 2026-10-21). If it goes, the content check should warn about a date after today in UTC. The rebuild overview's CI section has the note.
+- `future: true` publishes a paper dated after the build's day in UTC. Bruin works in Canberra, 10 or 11 hours ahead, so a paper he dates today and commits in the morning is in the future for a UTC build. Without the setting, Jekyll would leave it out and still exit `0`. The user kept it on 2026-10-30: the site deploys only on a push, so without it the paper would wait for Bruin's next commit.
 - Six papers carry `lang: de`, the ones written entirely in German. A new paper written in German needs it too.
 - `feed.xml` is hand-written, with no feed plugin. It builds every URL with `absolute_url`, which encodes the space and the curly apostrophes in the two pinned papers' URLs.
 
@@ -138,8 +138,8 @@ The content check, `_scripts/check-content.rb`, is the repo's only linter, and n
 
 `_scripts/check-content.rb` catches what GitHub's preview hides from Bruin: Markdown that kramdown, which builds the site, renders differently, and other mistakes in his pages and files that would show wrongly or break the site. Its header comment and the "Writing in Markdown" guide in `README.md` list what it checks. Every check has a fixture in `_scripts/check-content-fixtures/` and a line in `SELF_TEST_EXPECTED`, so the self-test fails if a check stops finding its problem or finds one in the clean fixtures.
 
-- `.github/workflows/check.yml` runs the content check, its self-test, a production build, the URL check and `jekyll doctor` on every push and pull request. An error fails the check. Once deploys exist, a failed check blocks the deploy (decided 2026-10-20).
-- The same workflow tells the user about problems on `master`, where Bruin edits, since GitHub emails only the person who pushed (decided 2026-10-25). A failed check opens an issue assigned to `NOTIFY_LOGIN`, the user's GitHub account, or comments on the one already open, and the next passing push closes it. Each file with warnings gets one issue, closed once the file has none. These jobs read the content check's `path:line: warning: message` lines, and rely on it printing its findings only after it has read every file. If either changes, change the "Pass the content warnings on" step to match.
+- `.github/workflows/check.yml` runs the content check, its self-test, a production build, the URL check and `jekyll doctor` on every push and pull request. An error fails the check. A failed check blocks the deploy (decided 2026-10-20), see Deployment.
+- The same workflow tells the user about problems on `master`, where Bruin edits, since GitHub emails only the person who pushed (decided 2026-10-25). A failed check or deploy opens an issue assigned to `NOTIFY_LOGIN`, the user's GitHub account, or comments on the one already open, and the next passing push closes it. Each file with warnings gets one issue, closed once the file has none. These jobs read the content check's `path:line: warning: message` lines, and rely on it printing its findings only after it has read every file. If either changes, change the "Pass the content warnings on" step to match.
 - `_scripts/check-urls.rb` checks the build against `_scripts/live-url-inventory.tsv`, every URL the live site served on 2026-10-18. A missing URL means a page moved: fix the cause, never the list. Remove a row only when the user agrees a page is gone for good (decided 2026-10-21).
 - Some checks only warn, Windows line endings among them (decided 2026-10-20). A warning leaves the exit status at `0`, and on `master` it opens a notice issue for the file. The script's header comment says which checks warn.
 - There's no way to skip a page. A false alarm means fixing the content check, not silencing it.
@@ -150,7 +150,7 @@ The content check, `_scripts/check-content.rb`, is the repo's only linter, and n
 
 - Ruby, managed locally with rbenv. Ruby 3.4.11, pinned in `.ruby-version`.
 - Jekyll 4.4.1, with kramdown for Markdown and Liquid for templates.
-- AWS S3 static website hosting.
+- AWS S3 static website hosting, deployed from GitHub Actions.
 
 ## Dependencies
 
@@ -172,11 +172,11 @@ Dependabot security updates are on in the repo's GitHub settings, and they stay 
 
 ## Deployment
 
-The live site is served from the S3 bucket `www.cbchristensen.net` (`ap-southeast-2`) over HTTP. `www.cbchristensen.net` is the canonical host. A separate nginx host redirects every path on `cbchristensen.net` to the same path on `www.`, and that redirect has to keep working.
+The live site is served from the S3 bucket `www.cbchristensen.net` (`ap-southeast-2`) over HTTP, through the bucket's website endpoint. Its `ErrorDocument` is `404.html`, which S3 serves with a `404` at any address with no file. `www.cbchristensen.net` is the canonical host. A separate nginx host redirects every path on `cbchristensen.net` to the same path on `www.`, and that redirect has to keep working.
 
-Semaphore CI used to build and deploy the site. The last deploy happened on 2022-04-19, before Semaphore's platform overhaul broke the setup. The user holds the AWS credentials. Don't attempt a deploy.
+Every push to `master` that passes the check goes live. The `deploy` job in `.github/workflows/check.yml` uploads the build the `check` job made, with `aws s3 sync` and `Cache-Control: no-cache` on every file. It signs in through GitHub's OIDC token as the IAM role `bruins-site-deploy`, whose ARN is in the repository secret `AWS_DEPLOY_ROLE_ARN`, so no AWS key is stored anywhere. AWS lets only runs on `master` take the role, and the role can only list the bucket and write and delete its files. A run whose commit is no longer `master`'s tip uploads nothing, so re-running an old run can't put an old build back.
 
-CI goes back to Semaphore after the rebuild, with GitHub Actions as the fallback if Semaphore isn't viable. The checks already run in GitHub Actions, whichever service deploys, see Content checks. TODO: document the deploy process once the CI plan is written.
+The user holds the AWS account. Agents never run `aws` commands or deploy by hand.
 
 ## Git workflow
 

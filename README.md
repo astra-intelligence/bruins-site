@@ -99,9 +99,9 @@ To show a picture, upload it to `files/images/`, then write `![description](/fil
 
 ### Checking your work
 
-After each commit, GitHub checks the site. It takes about a minute, with a small yellow dot next to the commit until it's done. A green tick then means all is well. A red cross means the check found something that would show wrongly on the site, or that a page which was online has gone missing, for example after a file was renamed.
+After each commit, GitHub checks the site and then puts it online. It takes a minute or two, with a small yellow dot next to the commit until it's done. A green tick then means all is well, and your change is on the site. A red cross means the check found something that would show wrongly on the site, or that a page which was online has gone missing, for example after a file was renamed. The site then stays as it was until a commit passes the check.
 
-Click the cross, then **Details**, to see the file, the line and what to change. Then edit the file in the browser and commit again. Pep hears about a red cross too, and can help. If the check itself looks wrong, tell Pep.
+Click the cross, then **Details**, to see the file, the line and what to change. Then edit the file in the browser and commit again. Pep hears about a red cross too, and can help. If the check itself looks wrong, tell Pep. If the line with the cross says **deploy** rather than **check**, the problem isn't in your files, and Pep will fix it.
 
 ## Developer
 
@@ -124,7 +124,7 @@ out=$(mktemp -d) && bundle exec jekyll build --destination "$out" && ruby _scrip
 
 ### Hosting
 
-The S3 bucket `www.cbchristensen.net`, in `ap-southeast-2`. A separate nginx host, outside this repo, redirects `cbchristensen.net` to `www.`.
+The S3 bucket `www.cbchristensen.net`, in `ap-southeast-2`. A separate nginx host, outside this repo, redirects `cbchristensen.net` to `www.`. GitHub deploys each push to `master` that passes the check, from the `deploy` job in `.github/workflows/check.yml`.
 
 ### Debugging Sass
 
